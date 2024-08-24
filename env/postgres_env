@@ -1,0 +1,9 @@
+# Description: Environment variables for establishing connection to Postgres database
+POSTGRES = "Postgres"
+POSTGRES_HOST = ""
+POSTGRES_PORT = ""
+POSTGRES_USER = ""
+POSTGRES_PASSWORD = ""
+# Postgres database names
+SENTINEL_DB_NAME = ""
+USER_DB_NAME = ""
