@@ -1,6 +1,6 @@
 """Users handler module."""
 
-import psycopg
+import psycopg  # type: ignore
 from db_config.postgres import Postgres
 
 

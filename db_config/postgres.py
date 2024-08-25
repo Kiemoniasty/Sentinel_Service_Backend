@@ -1,7 +1,10 @@
 """Postgres Database Connection Handlers"""
 
-import psycopg
-import env.postgres_env as env
+import os
+import psycopg  # type: ignore
+from dotenv import load_dotenv  # type: ignore
+
+load_dotenv()
 
 
 class Postgres:
@@ -11,21 +14,21 @@ class Postgres:
         """Establish connection with sentinel database"""
 
         return psycopg.connect(
-            host=env.POSTGRES,
-            hostaddr=env.POSTGRES_HOST,
-            port=env.POSTGRES_PORT,
-            dbname=env.SENTINEL_DB_NAME,
-            user=env.POSTGRES_USER,
-            password=env.POSTGRES_PASSWORD,
+            host=os.getenv("POSTGRES"),
+            hostaddr=os.getenv("POSTGRES_HOST"),
+            port=os.getenv("POSTGRES_PORT"),
+            dbname=os.getenv("SENTINEL_DB_NAME"),
+            user=os.getenv("POSTGRES_USER"),
+            password=os.getenv("POSTGRES_PASSWORD"),
         )
 
     def userdb_connector(self):
         """Establish connection with user database"""
         return psycopg.connect(
-            host=env.POSTGRES,
-            hostaddr=env.POSTGRES_HOST,
-            port=env.POSTGRES_PORT,
-            dbname=env.USER_DB_NAME,
-            user=env.POSTGRES_USER,
-            password=env.POSTGRES_PASSWORD,
+            host=os.getenv("POSTGRES"),
+            hostaddr=os.getenv("POSTGRES_HOST"),
+            port=os.getenv("POSTGRES_PORT"),
+            dbname=os.getenv("USER_DB_NAME"),
+            user=os.getenv("POSTGRES_USER"),
+            password=os.getenv("POSTGRES_PASSWORD"),
         )

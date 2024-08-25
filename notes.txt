@@ -1,3 +1,4 @@
+.env content
 # Description: Environment variables for establishing connection to Postgres database
 POSTGRES = "Postgres"
 POSTGRES_HOST = ""
@@ -7,3 +8,8 @@ POSTGRES_PASSWORD = ""
 # Postgres database names
 SENTINEL_DB_NAME = ""
 USER_DB_NAME = ""
+
+notes
+Przyszła rozbudowa
+Log kto i kiedy utworzył/modyfikował/usunął usługe
+Castomize Messages for logger

@@ -1,5 +1,4 @@
-/env
 /.vscode
 /logs
 /venv
-env/postgres_env
+.env
