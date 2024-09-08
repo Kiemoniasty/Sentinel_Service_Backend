@@ -5,6 +5,8 @@ click==8.1.7
 colorama==0.4.6
 Flask==3.0.3
 Flask-RESTful==0.3.10
+Flask-SQLAlchemy==3.1.1
+greenlet==3.0.3
 influxdb-client==1.43.0
 itsdangerous==2.2.0
 Jinja2==3.1.4
@@ -16,6 +18,7 @@ python-dotenv==1.0.1
 pytz==2024.1
 reactivex==4.0.4
 six==1.16.0
+SQLAlchemy==2.0.33
 typing_extensions==4.11.0
 tzdata==2024.1
 urllib3==2.2.1

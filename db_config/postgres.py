@@ -1,10 +1,10 @@
 """Postgres Database Connection Handlers"""
 
 import os
-import psycopg  # type: ignore
-from dotenv import load_dotenv  # type: ignore
+import psycopg
+from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(override=True)
 
 
 class Postgres:

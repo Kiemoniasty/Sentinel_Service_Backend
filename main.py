@@ -1,6 +1,8 @@
-import app.routes as routes 
+""" Main entry point for the application. """
 
-app = routes.app
+import app.app as flask_app
 
-if __name__ == '__main__':
+app = flask_app.app
+
+if __name__ == "__main__":
     app.run(debug=True)
