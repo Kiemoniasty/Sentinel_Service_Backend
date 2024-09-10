@@ -1,6 +1,6 @@
 """ Main entry point for the application. """
 
-import app.app as flask_app
+import app.flask as flask_app
 
 app = flask_app.app
 

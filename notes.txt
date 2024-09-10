@@ -1,15 +1,3 @@
-.env content
-# Description: Environment variables for establishing connection to Postgres database
-POSTGRES = "Postgres"
-POSTGRES_HOST = ""
-POSTGRES_PORT = ""
-POSTGRES_USER = ""
-POSTGRES_PASSWORD = ""
-# Postgres database names
-SENTINEL_DB_NAME = ""
-USER_DB_NAME = ""
-
-notes
 Przyszła rozbudowa:
 from werkzeug.serving import make_server
 
@@ -41,12 +29,29 @@ def stop_server():
     server.shutdown()
 Source: https://stackoverflow.com/questions/15562446/how-to-stop-flask-application-without-using-ctrl-c
 zmiana default portów
-interaktywne okno do łączenia z bazą
+ustawianie retencję danych w bucketach
+interaktywne okno do łączenia z bazą Postgres
+interaktywne okno do łączenia z bazą Influxa
 scrypt, który łaczy się domyślnym hasłem, i je zmienia - przygotowuje strukture
-Logi:
-w influxie i dokumencie, 
-built-in logger source: https://flask.palletsprojects.com/en/3.0.x/quickstart/#deploying-to-a-web-server
-log kiedy serwer wstał, czy połączono z bazą, czy serwer działa prawidłowo 
-Log kto i kiedy utworzył/modyfikował/usunął usługe
-
+instalowanie baz za pośrednictwem frontu
 Customize Messages for logger
+W ustawieniach opcja testu połączenia z bazami
+Logi:
+w influxie i dokumencie,
+built-in logger source: https://flask.palletsprojects.com/en/3.0.x/quickstart/#deploying-to-a-web-server
+log kiedy serwer wstał, czy połączono z bazą, czy serwer działa prawidłowo
+info za każdym requestem czy udało się połączyć z bazą:
+        
+Influx:
+    client = InfluxDBClient(
+        url=influxdb_url, token=influxdb_token, org=influxdb_org
+    )
+
+    health = client.health()
+
+    if health.status == "pass":
+        print("connected to influx")
+    else:
+        print("lul co se myślisz")
+
+Log kto i kiedy utworzył/modyfikował/usunął usługe

@@ -1,4 +1,4 @@
-"""Postgres Database Connection Handlers"""
+"""Postgres tools that can be used in none specific tasks"""
 
 import os
 import psycopg
@@ -7,8 +7,8 @@ from dotenv import load_dotenv
 load_dotenv(override=True)
 
 
-class Postgres:
-    """Postgres connection handlers"""
+class PostgresTools:
+    """Universal Postgresql tools"""
 
     def sentineldb_connector(self=None):
         """Establish connection with sentinel database"""

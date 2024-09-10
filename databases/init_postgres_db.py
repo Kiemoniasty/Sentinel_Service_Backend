@@ -2,7 +2,6 @@
 
 import os
 from dotenv import load_dotenv
-from flask import request
 import psycopg
 from psycopg import sql
 
@@ -11,12 +10,6 @@ load_dotenv()
 
 class InitPostgresDBs:
     """Initialize the databases and tables."""
-
-    def shutdown_server(self):
-        func = request.environ.get("werkzeug.server.shutdown")
-        if func is None:
-            raise RuntimeError("Not running with the Werkzeug Server")
-        func()
 
     def db_connector(self, dbname):
         """Establish connection with the database."""

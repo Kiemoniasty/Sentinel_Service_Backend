@@ -5,13 +5,15 @@ from flask import Flask
 
 # from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
-from db_config.init_postgres_db import InitPostgresDBs
+from databases.influxdb_tools import InfluxTools
+from databases.init_postgres_db import InitPostgresDBs
 
 # Load environment variables from .env file
 load_dotenv(override=True)
 
 # Start creation of database structure in postgres
 InitPostgresDBs.create_dbs()
+InfluxTools.influxdb_connector()
 
 app = Flask(__name__)
 
