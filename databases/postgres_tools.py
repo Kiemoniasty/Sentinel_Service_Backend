@@ -3,6 +3,7 @@
 import os
 import psycopg
 from dotenv import load_dotenv
+from sqlalchemy import create_engine
 
 load_dotenv(override=True)
 
@@ -22,7 +23,7 @@ class PostgresTools:
             password=os.getenv("POSTGRES_PASSWORD"),
         )
 
-    def userdb_connector(self):
+    def userdb_connector(self=None):
         """Establish connection with user database"""
         return psycopg.connect(
             host=os.getenv("POSTGRES"),
@@ -32,3 +33,13 @@ class PostgresTools:
             user=os.getenv("POSTGRES_USER"),
             password=os.getenv("POSTGRES_PASSWORD"),
         )
+
+    def db_connector(self=None, dbname=None):
+        """Establish a connection with the database."""
+
+        user = os.getenv("POSTGRES_USER")
+        password = os.getenv("POSTGRES_PASSWORD")
+        host = os.getenv("POSTGRES_HOST")
+        port = os.getenv("POSTGRES_PORT")
+
+        return create_engine(f"postgresql://{user}:{password}@{host}:{port}/{dbname}")
