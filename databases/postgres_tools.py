@@ -11,31 +11,19 @@ load_dotenv(override=True)
 class PostgresTools:
     """Universal Postgresql tools"""
 
-    def sentineldb_connector(self=None):
-        """Establish connection with sentinel database"""
-
+    def psycopg_connector(self=None, dbname=None):
+        """Establish connection with database with Psycopg"""
         return psycopg.connect(
             host=os.getenv("POSTGRES"),
             hostaddr=os.getenv("POSTGRES_HOST"),
             port=os.getenv("POSTGRES_PORT"),
-            dbname=os.getenv("SENTINEL_DB_NAME"),
+            dbname=dbname,
             user=os.getenv("POSTGRES_USER"),
             password=os.getenv("POSTGRES_PASSWORD"),
         )
 
-    def userdb_connector(self=None):
-        """Establish connection with user database"""
-        return psycopg.connect(
-            host=os.getenv("POSTGRES"),
-            hostaddr=os.getenv("POSTGRES_HOST"),
-            port=os.getenv("POSTGRES_PORT"),
-            dbname=os.getenv("USER_DB_NAME"),
-            user=os.getenv("POSTGRES_USER"),
-            password=os.getenv("POSTGRES_PASSWORD"),
-        )
-
-    def db_connector(self=None, dbname=None):
-        """Establish a connection with the database."""
+    def sqlalchemy_connector(self=None, dbname=None):
+        """Establish a connection with the database via SQLAlchemy."""
 
         user = os.getenv("POSTGRES_USER")
         password = os.getenv("POSTGRES_PASSWORD")

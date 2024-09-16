@@ -1,4 +1,5 @@
 Przyszła rozbudowa:
+sprawdzanie poprawności struktury przy uruchamianiu jeśli istnieją bazy 
 from werkzeug.serving import make_server
 
 class ServerThread(threading.Thread):
@@ -30,15 +31,21 @@ def stop_server():
 Source: https://stackoverflow.com/questions/15562446/how-to-stop-flask-application-without-using-ctrl-c
 zmiana default portów
 ustawianie retencję danych w bucketach
+
+instalowanie baz za pośrednictwem frontu:
 interaktywne okno do łączenia z bazą Postgres
-interaktywne okno do łączenia z bazą Influxa
 scrypt, który łaczy się domyślnym hasłem, i je zmienia - przygotowuje strukture
-instalowanie baz za pośrednictwem frontu
-Customize Messages for logger
+interaktywne okno do łączenia z bazą Influxa
+
 W ustawieniach opcja testu połączenia z bazami
+Customize Messages for logger
+planowanie maintenance
+stan serwera - obecne zużycie zasobów
+Planowanie, przypominanie i rekurencyjność maintenance
 Logi:
 w influxie i dokumencie,
 built-in logger source: https://flask.palletsprojects.com/en/3.0.x/quickstart/#deploying-to-a-web-server
+log imienne dla serwisów
 log kiedy serwer wstał, czy połączono z bazą, czy serwer działa prawidłowo
 info za każdym requestem czy udało się połączyć z bazą:
         
@@ -55,3 +62,7 @@ Influx:
         print("lul co se myślisz")
 
 Log kto i kiedy utworzył/modyfikował/usunął usługe
+
+
+!!!
+Test czy serwis dodawany jest dostępny
