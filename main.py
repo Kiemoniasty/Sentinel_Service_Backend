@@ -1,9 +1,7 @@
 """Main entry point for the application. """
 
-from app import flask as flask_app
+from app.flask import app
 from databases.init_postgres_db import InitPostgresDBs
-
-app = flask_app.app
 
 InitPostgresDBs.create_dbs()
 
