@@ -1,6 +1,5 @@
 from flask import jsonify
 from flask_restful import Resource
-from models.user import User
 
 # from app.flask import api
 
@@ -30,11 +29,15 @@ class UserController(Resource):
         if is_active:
             filter_list.append(f"is_active={is_active}")
 
+        filter_collection = ""
+
         for item in filter_list:
             if item == filter_list[0]:
                 filter_collection = item
             else:
                 filter_collection += "," + item
+
+        from models.user import User
 
         if filter_collection:
             query = User.query.filter(filter_collection).first()
@@ -45,17 +48,17 @@ class UserController(Resource):
             return jsonify({"message": "No user found"})
         else:
             result = []
-        for item in query:
-            result.append(
-                {
-                    "guid": item.guid,
-                    "login": item.login,
-                    "email": item.email,
-                    "phone_number": item.phone_number,
-                    "account_type": item.account_type,
-                    "is_active": item.is_active,
-                }
-            )
+            for item in query:
+                result.append(
+                    {
+                        "guid": item.guid,
+                        "login": item.login,
+                        "email": item.email,
+                        "phone_number": item.phone_number,
+                        "account_type": item.account_type,
+                        "is_active": item.is_active,
+                    }
+                )
         return jsonify(result)
 
 
