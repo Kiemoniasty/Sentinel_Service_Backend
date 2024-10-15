@@ -1,5 +1,8 @@
 import uuid
+
+from sqlalchemy import Enum
 from app.flask import db
+from enums.sentinel_enums import Response
 
 
 class Service(db.Model):
@@ -10,7 +13,7 @@ class Service(db.Model):
     guid = db.Column(db.UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = db.Column(db.String(255), nullable=False)
     setting_guid = db.Column(db.UUID(as_uuid=True), db.ForeignKey("settings.guid"))
-    actual_state = db.Column(db.String(255), nullable=False)
+    actual_state = db.Column(Enum(Response), nullable=False)
     setting = db.relationship("settings", uselist=False, backref="service")
 
     def __repr__(self):

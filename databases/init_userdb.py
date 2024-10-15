@@ -3,9 +3,10 @@
 import os
 import uuid
 from dotenv import load_dotenv
-from sqlalchemy import UUID, Boolean, Column, String
+from sqlalchemy import UUID, Boolean, Column, Enum, String
 from sqlalchemy.ext.declarative import declarative_base
 from databases.postgres_tools import PostgresTools
+from enums.user_enums import AccountType
 
 load_dotenv()
 Base = declarative_base()
@@ -27,7 +28,7 @@ class User(Base):
     email = Column(String(255), nullable=True, unique=True)
     password = Column(String(255), nullable=False)
     phone_number = Column(String(255), nullable=True)
-    account_type = Column(String(255), nullable=False, default="user")
+    account_type = Column(Enum(AccountType), nullable=False, default=AccountType.USER)
     is_active = Column(Boolean, nullable=False, default=True)
 
 

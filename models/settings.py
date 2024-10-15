@@ -1,5 +1,8 @@
 import uuid
+
+from sqlalchemy import Enum
 from app.flask import db
+from enums.sentinel_enums import Status
 
 
 class Settings(db.Model):
@@ -8,7 +11,7 @@ class Settings(db.Model):
     __tablename__ = "settings"
 
     guid = db.Column(db.UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    status = db.Column(db.String(255), nullable=False)
+    status = db.Column(Enum(Status), nullable=False, default=Status.ACTIVE)
     address = db.Column(db.String(255), nullable=False)
     frequency = db.Column(db.Integer, nullable=False)
     response_time = db.Column(db.Integer, nullable=False)

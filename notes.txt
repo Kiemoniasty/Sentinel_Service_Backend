@@ -62,7 +62,4 @@ Influx:
         print("lul co se myślisz")
 
 Log kto i kiedy utworzył/modyfikował/usunął usługe
-
-
-!!!
 Test czy serwis dodawany jest dostępny

@@ -3,10 +3,11 @@
 import os
 import uuid
 from dotenv import load_dotenv
-from sqlalchemy import Column, String, Integer, ForeignKey
+from sqlalchemy import Column, Enum, String, Integer, ForeignKey
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.declarative import declarative_base
 from databases.postgres_tools import PostgresTools
+from enums.sentinel_enums import Status
 
 load_dotenv()
 Base = declarative_base()
@@ -18,7 +19,7 @@ class Settings(Base):
     __tablename__ = "settings"
 
     guid = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    status = Column(String(255), nullable=False)
+    status = Column(Enum(Status), nullable=False, default=Status.ACTIVE)
     address = Column(String(255), nullable=False)
     frequency = Column(Integer, nullable=False)
     response_time = Column(Integer, nullable=False)
