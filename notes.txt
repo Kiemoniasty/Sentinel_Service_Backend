@@ -63,3 +63,4 @@ Influx:
 
 Log kto i kiedy utworzył/modyfikował/usunął usługe
 Test czy serwis dodawany jest dostępny
+Powiadomienia dla wskazanych userów/grup - logowanie tego

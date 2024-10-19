@@ -5,6 +5,7 @@ from controllers.user_controller import UserController
 
 api = Blueprint("api", __name__)
 
+
 # USER ROUTES
 
 

@@ -123,21 +123,6 @@ class ServiceController:
                 subitem.number_of_samples = data["number_of_samples"]
 
         db.session.commit()
-        # [
-        #     {
-        #         "guid": item.guid,
-        #         "name": item.name,
-        #         "setting": {
-        #             "guid": subitem.guid,
-        #             "status": subitem.status.value,
-        #             "address": subitem.address,
-        #             "frequency": subitem.frequency,
-        #             "response_time": subitem.response_time,
-        #             "number_of_samples": subitem.number_of_samples,
-        #         },
-        #         "actual_state": item.actual_state.value,
-        #     }
-        # ]
 
         return {"message": "Service updated successfully"}, 200
 
