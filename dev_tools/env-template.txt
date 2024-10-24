@@ -1,5 +1,7 @@
 
 DATABASE_URL=postgresql://postgres:PASSWORD@localhost:5432/postgres
+SENTINEL_URL=postgresql://postgres:PASSWORD@localhost:5432/sentinel_db
+USER_URL=postgresql://postgres:PASSWORD@localhost:5432/users_db
 # Description: Environment variables for establishing connection to Postgres database
 POSTGRES = Postgres
 POSTGRES_HOST = 127.0.0.1
