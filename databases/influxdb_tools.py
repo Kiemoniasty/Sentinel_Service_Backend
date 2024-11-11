@@ -2,7 +2,7 @@
 
 import os
 from dotenv import load_dotenv
-from influxdb_client import BucketRetentionRules, InfluxDBClient
+from influxdb_client import BucketRetentionRules, InfluxDBClient, Point
 
 load_dotenv(override=True)
 
@@ -18,7 +18,7 @@ class InfluxTools:
 
         return InfluxDBClient(url=influxdb_url, token=influxdb_token, org=influxdb_org)
 
-    def create_bucket(self, name, retention=None):
+    def create_bucket(self=None, name=None, retention=None):
         """Creates bucket in organisation"""
         client = InfluxTools.influxdb_connector()
 
@@ -29,8 +29,21 @@ class InfluxTools:
 
         retention_rules = BucketRetentionRules(type="expire", every_seconds=retention)
 
-        return client.buckets_api().create_bucket(
+        client.buckets_api().create_bucket(
             bucket_name=name,
             retention_rules=retention_rules,
             org=os.getenv("INFLUXDB_ORG"),
         )
+
+        client.close()
+
+        return f"Bucket {name} created with retention {retention}"
+
+    def write_data(self=None, bucket=None, point=None):
+        client = InfluxTools.influxdb_connector()
+
+        # Write the point to the specified bucket
+        write_api = client.write_api()
+        write_api.write(bucket=bucket, org=os.getenv("INFLUXDB_ORG"), record=point)
+        print("Data written successfully.")
+        client.close()

@@ -1,5 +1,6 @@
 from flask import jsonify
 
+from databases.influxdb_tools import InfluxTools
 from enums.sentinel_enums import Response, Status
 
 
@@ -42,6 +43,8 @@ class ServiceController:
 
         db.session.add(new_service)
         db.session.commit()
+
+        InfluxTools.create_bucket(name=new_service.guid)
 
         return jsonify({"message": "Service created successfully"}), 201
 
