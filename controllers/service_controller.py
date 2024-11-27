@@ -127,6 +127,17 @@ class ServiceController:
 
         db.session.commit()
 
+        # changes in scheduler
+        from app.flask import state_checker
+
+        if data["status"] == Response.AVAILABLE.name:
+            state_checker.stop_task_by_tag(service.guid)
+            state_checker.schedule_task(service)
+            print(f"Service: '{service.guid}' rescheduled successfully.")
+        else:
+            state_checker.stop_task_by_tag(service.guid)
+            print(f"Service: '{service.guid}' stopped successfully.")
+
         return {"message": "Service updated successfully"}, 200
 
     def delete(self=None, guid=None):

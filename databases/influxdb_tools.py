@@ -2,7 +2,7 @@
 
 import os
 from dotenv import load_dotenv
-from influxdb_client import BucketRetentionRules, InfluxDBClient, Point
+from influxdb_client import BucketRetentionRules, InfluxDBClient
 
 load_dotenv(override=True)
 
@@ -10,7 +10,7 @@ load_dotenv(override=True)
 class InfluxTools:
     """Universal InfluxDB tools"""
 
-    def influxdb_connector(self=None):
+    def connector(self=None):
         """Establish connection with InfluxDB"""
         influxdb_url = os.getenv("INFLUXDB_URL")
         influxdb_token = os.getenv("INFLUXDB_TOKEN")
@@ -20,7 +20,7 @@ class InfluxTools:
 
     def create_bucket(self=None, name=None, retention=None):
         """Creates bucket in organisation"""
-        client = InfluxTools.influxdb_connector()
+        client = InfluxTools.connector()
 
         if isinstance(retention, int) or retention == "" or retention is None:
             retention = 180 * 24 * 60 * 60
@@ -40,7 +40,7 @@ class InfluxTools:
         return f"Bucket {name} created with retention {retention}"
 
     def write_data(self=None, bucket=None, point=None):
-        client = InfluxTools.influxdb_connector()
+        client = InfluxTools.connector()
 
         # Write the point to the specified bucket
         write_api = client.write_api()

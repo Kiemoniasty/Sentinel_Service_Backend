@@ -131,7 +131,7 @@ def delete_service():
 @api.route(BASE_URL + "/searchService", methods=["GET"])
 def search_service():
     """GET /api/v1/searchService?name=name - query service by name"""
-    # /spi/v1/services?q=[search_query]&sort
+    # /api/v1/services?q=[search_query]&sort
     # /api/v1/services/:id
 
     data = {

@@ -23,3 +23,5 @@ class StateLogger:
 
         bucket_name = str(state_log.guid)
         InfluxTools.write_data(bucket=bucket_name, point=point)
+
+    # UPDATE ACTUAL STATE in Services db
