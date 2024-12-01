@@ -1,6 +1,6 @@
 """Collection of tools for Service Controllers"""
 
-from enums.sentinel_enums import Status
+from enums.sentinel_enums import Response, Status
 
 
 class ServiceTools:
@@ -80,15 +80,15 @@ class ServiceTools:
     def valid_actual_state(self=None, actual_state=None):
         """Validate the actual state."""
 
-        for item in Status:
+        for item in Response:
             if item.value == str(actual_state).lower():
                 return item.name
 
     def value_actual_state(self=None, actual_state=None):
         """Validate the actual state."""
 
-        for item in Status:
-            if item.name == actual_state:
+        for item in Response:
+            if item == actual_state:
                 return item.value
 
     def string_to_int(self=None, data=None):

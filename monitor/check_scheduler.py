@@ -22,10 +22,12 @@ class StateChecker:
 
         def job():
             HealthChecker.ping_service(
-                self=None,
-                service=service,
-                settings=settings,
+                guid=service.guid, service=service, settings=settings
             )
+            from app.flask import state_checker
+
+            print("Stopping...")
+            state_checker.stop()
 
         def run_threaded(job_func):
             job_thread = threading.Thread(target=job_func)

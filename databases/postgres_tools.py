@@ -5,6 +5,8 @@ import psycopg
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 
+from controllers.service_tools import ServiceTools
+
 load_dotenv(override=True)
 
 
@@ -45,3 +47,38 @@ class PostgresTools:
 
         db.session.delete(data)
         db.session.commit()
+
+    def update_service(self=None, guid=None, data=None):
+        """Update service data in the database."""
+
+        setting = data.get("settings", {})
+
+        from models.settings import Settings
+        from models.service import Service
+        from app.flask import db, app
+
+        with app.app_context():
+            service = Service.query.filter_by(guid=guid).first()
+            settings = Settings.query.filter_by(guid=service.setting_guid).first()
+
+            if "name" in data:
+                service.name = data["name"]
+            if "actual_state" in data:
+                service.actual_state = ServiceTools.valid_actual_state(
+                    actual_state=data["actual_state"]
+                )
+
+            if "status" in setting:
+                settings.status = ServiceTools.valid_status(status=setting["status"])
+            if "address" in setting:
+                settings.address = setting["address"]
+            if "frequency" in setting:
+                settings.frequency = ServiceTools.string_to_int(
+                    data=setting["frequency"]
+                )
+            if "response_time" in setting:
+                settings.response_time = setting["response_time"]
+            if "number_of_samples" in setting:
+                settings.number_of_samples = setting["number_of_samples"]
+
+            db.session.commit()

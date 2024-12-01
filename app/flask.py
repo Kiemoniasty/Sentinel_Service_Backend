@@ -1,10 +1,10 @@
 """Starts the Flask app."""
 
 # import os
-import config
 from dotenv import load_dotenv
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+import config
 from databases.init_postgres_db import InitPostgresDBs
 
 # import config
@@ -43,6 +43,7 @@ all_tasks = state_checker.get_task_list()
 for i, task in enumerate(all_tasks):
     print(i, " - ", task)
 print("retrieved")
+state_checker.run_continuously()
 # state_checker.run_continuously()
 
 # InfluxTools.write_data()

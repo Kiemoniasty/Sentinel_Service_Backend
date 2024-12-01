@@ -1,8 +1,7 @@
 """Collection of functions to check the health of a service."""
 
 import subprocess
-
-# from databases.postgres_tools import PostgresTools
+from databases.postgres_tools import PostgresTools
 from enums.sentinel_enums import Codes, Response
 from models.service_state import StateLog
 
@@ -12,13 +11,14 @@ from models.service_state import StateLog
 class HealthChecker:
     """HealthChecker class to check the health of a service."""
 
-    def ping_service(self, service, settings):
+    def ping_service(self=None, guid=None, service=None, settings=None):
         """
         Ping a service to check its reachability.
 
         Args:
         - address (str): IP address or hostname of the service.
         """
+        data = {}
         state_log = StateLog()
         state_log.guid = service.guid
         state_log.name = service.name
@@ -42,9 +42,9 @@ class HealthChecker:
             state_log.state = Response.AVAILABLE.value
             state_log.message = Codes.I004.value
             state_log.code = Codes.I004.name
-            state_log.status = settings.status
+            state_log.status = settings.status.value
 
-            service.actual_state = Response.AVAILABLE.name
+            data["actual_state"] = Response.AVAILABLE.name
 
         # If the ping command returns 0, the service is reachable
         except subprocess.CalledProcessError:
@@ -52,11 +52,15 @@ class HealthChecker:
             state_log.state = Response.UNAVAILABLE.value
             state_log.message = Codes.E001.value
             state_log.code = Codes.E001.name
-            state_log.status = settings.status
+            state_log.status = settings.status.value
 
-            service.actual_state = Response.UNAVAILABLE.name
+            data["actual_state"] = Response.UNAVAILABLE.name
 
-        # TODO: Continue from here
-        print(f"result: {state_log}")
+        PostgresTools.update_service(guid=guid, data=data)
+
+        print(f"result: {state_log.get()}")
+        # for item in state_log.__dict__:
+        #     print(item, ":", state_log.__dict__[item])
+        # print()
         # PostgresTools.write_data(data=service)
         # StateLogger.write_state(None, state_log)

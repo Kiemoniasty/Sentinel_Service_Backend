@@ -1,7 +1,5 @@
 """Collection of setters/getter for StateLog model"""
 
-from enums.sentinel_enums import Codes, LoggerMessages, Response, Status
-
 
 class StateLog:
     """StateLog model for influxdb"""
@@ -14,11 +12,6 @@ class StateLog:
         self._message = None
         self._code = None
         self._status = None
-
-    def validate(self, value, enum_class):
-        """Data validator"""
-        if isinstance(value, enum_class):
-            return value
 
     def set(
         self,
@@ -38,13 +31,13 @@ class StateLog:
         if name:
             self._name = name
         if state:
-            self._state = self.validate(state, Response)
+            self._state = state
         if message:
-            self._message = self.validate(message, LoggerMessages)
+            self._message = message
         if code:
-            self._code = self.validate(code, Codes)
+            self._code = code
         if status:
-            self._status = self.validate(status, Status)
+            self._status = status
 
     def get(self):
         """Get values for instance of StateLog"""
@@ -98,7 +91,7 @@ class StateLog:
     @state.setter
     def state(self, value):
         """Set state for StateLog instance"""
-        self._state = self.validate(value, Response)
+        self._state = value
 
     @property
     def message(self):
@@ -108,7 +101,7 @@ class StateLog:
     @message.setter
     def message(self, value):
         """Set message for StateLog instance"""
-        self._message = self.validate(value, LoggerMessages)
+        self._message = value
 
     @property
     def code(self):
@@ -118,7 +111,7 @@ class StateLog:
     @code.setter
     def code(self, value):
         """Set code for StateLog instance"""
-        self._code = self.validate(value, Codes)
+        self._code = value
 
     @property
     def status(self):
@@ -128,4 +121,4 @@ class StateLog:
     @status.setter
     def status(self, value):
         """Set status for StateLog instance"""
-        self._status = self.validate(value, Status)
+        self._status = value

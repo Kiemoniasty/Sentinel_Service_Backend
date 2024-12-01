@@ -95,46 +95,20 @@ class ServiceController:
     def put(self=None, guid=None, data=None):
         """Update services and its settings in the database"""
 
-        setting = data.get("settings", {})
-
-        if "status" in setting:
-            setting["status"] = ServiceTools.valid_status(status=setting["status"])
-
-        if "actual_state" in data:
-            data["actual_state"] = ServiceTools.valid_actual_state(
-                actual_state=data["actual_state"]
-            )
-
-        from models.settings import Settings
         from models.service import Service
-        from app.flask import db
 
         service = Service.query.filter_by(guid=guid).first()
-        settings = Settings.query.filter_by(guid=setting["guid"]).first()
 
         if not service:
             return jsonify({"message": "No service found"}), 404
-
-        if "name" in data:
-            service.name = data["name"]
-        if "actual_state" in data:
-            service.actual_state = data["actual_state"]
-
-        if "status" in setting:
-            settings.status = setting["status"]
-        if "address" in setting:
-            settings.address = setting["address"]
-        if "frequency" in setting:
-            settings.frequency = ServiceTools.string_to_int(data=setting["frequency"])
-        if "response_time" in setting:
-            settings.response_time = setting["response_time"]
-        if "number_of_samples" in setting:
-            settings.number_of_samples = setting["number_of_samples"]
-
-        db.session.commit()
+        else:
+            PostgresTools.update_service(guid=guid, data=data)
 
         # changes in scheduler
+        from models.settings import Settings
         from app.flask import state_checker
+
+        settings = Settings.query.filter_by(guid=service.setting_guid).first()
 
         if settings.status.name == Status.ACTIVE.name:
             state_checker.stop_task_by_tag(service.guid)

@@ -1,7 +1,9 @@
 """Made for dropping databases in Postgres"""
 
 import os
+from uuid import UUID
 from dotenv import load_dotenv
+from influxdb_client import InfluxDBClient
 from psycopg import sql
 import psycopg
 
@@ -19,6 +21,43 @@ def psycopg_connector():
         user=os.getenv("POSTGRES_USER"),
         password=os.getenv("POSTGRES_PASSWORD"),
     )
+
+
+def infux_connector():
+    """Establish connection with InfluxDB"""
+    influxdb_url = os.getenv("INFLUXDB_URL")
+    influxdb_token = os.getenv("INFLUXDB_TOKEN")
+    influxdb_org = os.getenv("INFLUXDB_ORG")
+
+    return InfluxDBClient(url=influxdb_url, token=influxdb_token, org=influxdb_org)
+
+
+def is_uuid4(value):
+    """
+    Validate if the given string is a valid UUID4.
+    """
+    try:
+        uuid_obj = UUID(value, version=4)
+        return str(uuid_obj) == value
+    except ValueError:
+        return False
+
+
+def delete_uuid_buckets():
+    """
+    Query all buckets and delete those whose names are valid UUID4.
+    """
+    client = infux_connector()
+    buckets_api = client.buckets_api()
+    all_buckets = buckets_api.find_buckets().buckets
+
+    for bucket in all_buckets:
+        bucket_name = bucket.name
+        if is_uuid4(bucket_name):
+            print(f"Deleting bucket: {bucket_name}")
+            buckets_api.delete_bucket(bucket)
+        else:
+            print(f"Skipping bucket: {bucket_name} (not UUID4)")
 
 
 def drop_databases():
@@ -53,4 +92,5 @@ def drop_databases():
     print("Done")
 
 
+delete_uuid_buckets()
 drop_databases()
