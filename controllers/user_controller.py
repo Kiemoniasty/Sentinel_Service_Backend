@@ -1,6 +1,8 @@
 """Controller for user instance"""
 
 from flask import jsonify
+from controllers.user_tools import UserTools
+from databases.postgres_tools import PostgresTools
 from enums.user_enums import AccountType
 
 
@@ -11,12 +13,16 @@ class UserController:
         """Create a new user in the database"""
 
         if "account_type" in data:
-            for item in AccountType:
-                if item.value == data["account_type"]:
-                    data["account_type"] = item.name
+            data["account_type"] = UserTools.valid_account_type(
+                account_type=data["account_type"]
+            )
+
+        if "is_active" in data:
+            data["is_active"] = UserTools.valid_is_active(is_active=data["is_active"])
+            if data["is_active"] is None:
+                del data["is_active"]
 
         from models.user import User
-        from app.flask import db
 
         new_user = User(
             guid=data.get("guid"),
@@ -24,14 +30,21 @@ class UserController:
             password=data["password"],
             email=data.get("email"),
             phone_number=data.get("phone_number"),
-            account_type=data.get("account_type", AccountType.USER.name),
+            account_type=(
+                data.get("account_type")
+                if "account_type" in data
+                else AccountType.USER.name
+            ),
             is_active=data.get("is_active"),
         )
 
-        db.session.add(new_user)
-        db.session.commit()
+        message = UserTools.valid_new_user(data=data)
 
-        return jsonify({"message": "User created successfully"}), 201
+        if message:
+            return jsonify({"message": message}), 409
+        else:
+            PostgresTools.write_data(data=new_user)
+            return jsonify({"message": "User created successfully"}), 201
 
     def get(self=None, guid=None):
         """Query user/s from database depending on the guid if provided"""
@@ -43,18 +56,8 @@ class UserController:
         else:
             query = User.query.all()
 
-        result = []
-        for item in query:
-            result.append(
-                {
-                    "guid": item.guid,
-                    "login": item.login,
-                    "email": item.email,
-                    "phone_number": item.phone_number,
-                    "account_type": item.account_type.value,
-                    "is_active": item.is_active,
-                }
-            )
+        result = UserTools.user_to_list(data=query)
+
         if not result:
             return jsonify({"message": "No user found"}), 404
         else:
@@ -65,26 +68,25 @@ class UserController:
         from models.user import User
         from app.flask import db
 
-        user = User.query.filter_by(guid=guid)
+        user = User.query.filter_by(guid=guid).first()
         if not user:
             return jsonify({"message": "No user found"}), 404
 
         if "account_type" in data:
-            for item in AccountType:
-                if item.value == data["account_type"]:
-                    data["account_type"] = item.name
+            data["account_type"] = UserTools.valid_account_type(
+                account_type=data["account_type"]
+            )
 
-        for item in user:
-            if "login" in data:
-                item.login = data["login"]
-            if "email" in data:
-                item.email = data["email"]
-            if "phone_number" in data:
-                item.phone_number = data["phone_number"]
-            if "account_type" in data:
-                item.account_type = data["account_type"]
-            if "is_active" in data:
-                item.is_active = data["is_active"]
+        if "login" in data:
+            user.login = data["login"]
+        if "email" in data:
+            user.email = data["email"]
+        if "phone_number" in data:
+            user.phone_number = data["phone_number"]
+        if "account_type" in data:
+            user.account_type = data["account_type"]
+        if "is_active" in data:
+            user.is_active = data["is_active"]
 
         db.session.commit()
 
@@ -93,34 +95,33 @@ class UserController:
     def delete(self=None, guid=None):
         """Delete user from the database"""
         from models.user import User
-        from app.flask import db
 
         user = User.query.filter_by(guid=guid).first()
         if not user:
             return jsonify({"message": "No user found"}), 404
+        elif user.is_active:
+            return jsonify({"message": "User is active"}), 409
         else:
-            db.session.delete(user)
-            db.session.commit()
+            PostgresTools.delete_data(data=user)
 
             return jsonify({"message": "User deleted successfully"}), 200
 
     def search(self=None, data=None):
         """Search user in the database"""
 
+        for item in data:
+            print(item + ": " + str(data[item]))
         from models.user import User
 
         if "is_active" in data:
-            if data["is_active"].lower() == "active":
-                data["is_active"] = True
-            elif data["is_active"].lower() == "inactive":
-                data["is_active"] = False
-            else:
+            data["is_active"] = UserTools.valid_is_active(is_active=data["is_active"])
+            if data["is_active"] is None:
                 del data["is_active"]
 
         if "account_type" in data:
-            for item in AccountType:
-                if item.value == data["account_type"]:
-                    data["account_type"] = item.name
+            data["account_type"] = UserTools.valid_account_type(
+                account_type=data["account_type"]
+            )
 
         if data:
             query = User.query.filter(
@@ -141,18 +142,7 @@ class UserController:
         else:
             query = User.query.all()
 
-        result = []
-        for item in query:
-            result.append(
-                {
-                    "guid": item.guid,
-                    "login": item.login,
-                    "email": item.email,
-                    "phone_number": item.phone_number,
-                    "account_type": item.account_type.value,
-                    "is_active": item.is_active,
-                }
-            )
+        result = UserTools.user_to_list(data=query)
 
         if not result:
             return jsonify({"message": "No user found"}), 404
@@ -164,7 +154,9 @@ class UserController:
         from models.user import User
         from app.flask import db
 
-        user = User.query.filter_by(guid=guid)
+        users = User.query.filter_by(guid=guid)
+        for item in users:
+            user = item
 
         current_password = data.get("current_password")
         new_password = data.get("new_password")

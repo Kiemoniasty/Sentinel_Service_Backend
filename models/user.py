@@ -25,9 +25,18 @@ class User(db.Model):
     password = db.Column(db.String(255), nullable=False)
     phone_number = db.Column(db.String(255), nullable=True, unique=True)
     account_type = db.Column(
-        Enum(AccountType), nullable=False, default=AccountType.USER
+        Enum(AccountType),
+        nullable=False,
+        default=AccountType.USER.name,
     )
     is_active = db.Column(db.Boolean, nullable=False, default=True)
 
     def __repr__(self):
-        return f"<User {self.login}>"
+        return f"""
+            guid: {self.guid},
+            login: {self.login},
+            email: {self.email},
+            phone_number: {self.phone_number},
+            account_type: {self.account_type},
+            is_active: {self.is_active}
+            """

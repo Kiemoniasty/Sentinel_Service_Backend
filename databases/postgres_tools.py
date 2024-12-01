@@ -31,3 +31,17 @@ class PostgresTools:
         port = os.getenv("POSTGRES_PORT")
 
         return create_engine(f"postgresql://{user}:{password}@{host}:{port}/{dbname}")
+
+    def write_data(self=None, data=None):
+        """Write data to the database."""
+        from app.flask import db
+
+        db.session.add(data)
+        db.session.commit()
+
+    def delete_data(self=None, data=None):
+        """Delete data from the database."""
+        from app.flask import db
+
+        db.session.delete(data)
+        db.session.commit()

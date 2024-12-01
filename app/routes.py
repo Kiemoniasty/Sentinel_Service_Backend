@@ -63,9 +63,9 @@ def update_user():
     return UserController.put(guid=guid, data=data)
 
 
-@api.route(BASE_URL + "/pass/user", methods=["PUT"])
+@api.route(BASE_URL + "/pass", methods=["PUT"])
 def update_password():
-    """PUT /api/v1/pass/user?id=guid - update user password by guid"""
+    """PUT /api/v1/pass?id=guid - update user password by guid"""
 
     guid = request.args.get("id")
     data = request.get_json()

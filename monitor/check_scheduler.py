@@ -1,9 +1,10 @@
+"""Scheduler class to manage scheduled tasks for health checks."""
+
 import threading
 import time
 import schedule
-from databases.init_sentineldb import Settings
-from models.service import Service
-from monitor.ping import HealthChecker
+from enums.sentinel_enums import Status
+from monitor.health_checker import HealthChecker
 
 
 class StateChecker:
@@ -13,33 +14,36 @@ class StateChecker:
         self.cease_continuous_run = None
 
     @staticmethod
-    def schedule_task(service: Service):
+    def schedule_task(service, settings):
+        # def schedule_task(self, service, settings):
         """
         Add a new task for a specific service.
         """
-        settings = Settings.query.filter_by(guid=service.setting_guid).first()
-        if not settings:
-            print(f"Settings not found for service: {service.guid}")
-            return
 
         def job():
             HealthChecker.ping_service(
                 self=None,
-                address=settings.address,
-                timeout=settings.response_time,
-                count=settings.number_of_samples,
+                service=service,
+                settings=settings,
             )
 
+        def run_threaded(job_func):
+            job_thread = threading.Thread(target=job_func)
+            job_thread.start()
+
         # Schedule the job with the service GUID as its tag
-        schedule.every(settings.frequency).seconds.do(job).tag(service.guid)
+        schedule.every(settings.frequency).seconds.do(run_threaded, job).tag(
+            str(service.guid)
+        )
         print(f"Task added for service '{service.guid}'.")
 
     @staticmethod
     def stop_task_by_tag(tag):
+        # def stop_task_by_tag(self, tag):
         """
         Stop a scheduled job by its tag.
         """
-        schedule.clear(tag)
+        schedule.clear(str(tag))
         print(f"Task with tag '{tag}' has been stopped.")
 
     def run_continuously(self, interval=1):
@@ -76,10 +80,20 @@ class StateChecker:
         """
         Initialize list of jobs and adding it to the scheduler.
         """
+        from models.settings import Settings
+        from models.service import Service
 
-        for service in Service.query.all():
-            settings = Settings.query.filter_by(guid=service.setting_guid)
-            if settings.status == "ACTIVE":
-                self.schedule_task(service)
+        services = Service.query.all()
+        for service in services:
+            settings = Settings.query.filter_by(guid=service.setting_guid).first()
+            if settings.status.name == Status.ACTIVE.name:
+                self.schedule_task(service, settings)
 
         print("All tasks scheduled.")
+
+    def get_task_list(self):
+        """
+        Get list of all scheduled tasks.
+        """
+
+        return schedule.get_jobs()

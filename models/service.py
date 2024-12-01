@@ -10,11 +10,22 @@ class Service(db.Model):
     __bind_key__ = "sentineldb"
     __tablename__ = "services"
 
-    guid = db.Column(db.UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    guid = db.Column(
+        db.UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4,
+        nullable=False,
+        unique=True,
+    )
     name = db.Column(db.String(255), nullable=False)
     setting_guid = db.Column(db.UUID(as_uuid=True), db.ForeignKey("settings.guid"))
-    actual_state = db.Column(Enum(Response), nullable=False)
-    setting = db.relationship("settings", uselist=False, backref="service")
+    actual_state = db.Column(Enum(Response), nullable=True, default=None)
+    setting = db.relationship("Settings", uselist=False, backref="service")
 
     def __repr__(self):
-        return f"<Service {self.name}>"
+        return f"""
+            guid: {self.guid},
+            name: {self.name},
+            setting_guid: {self.setting_guid},
+            actual_state: {self.actual_state}
+            """

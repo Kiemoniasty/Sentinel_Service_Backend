@@ -1,38 +1,47 @@
-from flask import jsonify
+"""Collection of methods for ServiceController"""
 
+from flask import jsonify
+from controllers.service_tools import ServiceTools
 from databases.influxdb_tools import InfluxTools
-from enums.sentinel_enums import Response, Status
+from databases.postgres_tools import PostgresTools
+from enums.sentinel_enums import Status
 
 
 class ServiceController:
+    """ServiceController class to manage services routes"""
 
     def post(self=None, data=None):
+        """Create a new service and its settings in database"""
+
+        setting = data.get("settings", {})
+
+        if "status" in setting:
+            setting["status"] = ServiceTools.valid_status(status=setting["status"])
+
+        if "actual_state" in data:
+            data["actual_state"] = ServiceTools.valid_actual_state(
+                actual_state=data["actual_state"]
+            )
+
+        if not "name" in data:
+            return jsonify({"message": "Name is required"}), 405
+        if not "address" in setting:
+            return jsonify({"message": "Address is required"}), 405
 
         from models.settings import Settings
         from models.service import Service
-        from app.flask import db
-
-        if "status" in data:
-            for item in Status:
-                if item.value == data["status"]:
-                    data["status"] = item.name
-
-        if "actual_state" in data:
-            for item in Response:
-                if item.value == data["actual_state"]:
-                    data["actual_state"] = item.name
 
         new_setting = Settings(
-            guid=data.get("setting_guid"),
-            status=data["status"],
-            address=data["address"],
-            frequency=int(data["frequency"]),
-            response_time=int(data["response_time"]),
-            number_of_samples=int(data["number_of_samples"]),
+            guid=setting.get("guid"),
+            status=setting.get("status"),
+            address=setting["address"],
+            frequency=int(setting.get("frequency")),
+            response_time=int(setting.get("response_time")),
+            number_of_samples=int(setting.get("number_of_samples")),
         )
 
-        db.session.add(new_setting)
-        db.session.commit()
+        # write data to Postgres
+        PostgresTools.write_data(data=new_setting)
 
         new_service = Service(
             guid=data.get("guid"),
@@ -41,44 +50,42 @@ class ServiceController:
             setting_guid=new_setting.guid,
         )
 
-        db.session.add(new_service)
-        db.session.commit()
+        # write data to Postgres
+        PostgresTools.write_data(data=new_service)
 
-        InfluxTools.create_bucket(name=new_service.guid)
+        # create bucket in InfluxDB
+        # InfluxTools.create_bucket(name=new_service.guid)
+        # InfluxTools.delete_bucket(name=new_service.guid)
+
+        # create task in scheduler
+        from app.flask import state_checker
+
+        if new_setting.status.name == Status.ACTIVE.name:
+            state_checker.schedule_task(new_service, new_setting)
+            print("START: '{new_service.guid}' scheduled successfully.")
 
         return jsonify({"message": "Service created successfully"}), 201
 
     def get(self=None, guid=None):
-
-        from models.service import Service
+        """Query service/s and its settings from database depending on the guid if provided"""
         from models.settings import Settings
+        from models.service import Service
+
+        query = None
+        subquery = None
 
         if guid:
             query = Service.query.filter_by(guid=guid)
-            subquery = Settings.query.filter_by(guid=query.setting_guid)
+
+            if query:
+                setting = query.first()
+                subquery = Settings.query.filter_by(guid=setting.setting_guid)
+
         else:
             query = Service.query.all()
             subquery = Settings.query.all()
 
-        result = []
-        for item in query:
-            for subitem in subquery:
-                if item.setting_guid == subitem.guid:
-                    result.append(
-                        {
-                            "guid": item.guid,
-                            "name": item.name,
-                            "setting": {
-                                "guid": subitem.guid,
-                                "status": subitem.status.value,
-                                "address": subitem.address,
-                                "frequency": subitem.frequency,
-                                "response_time": subitem.response_time,
-                                "number_of_samples": subitem.number_of_samples,
-                            },
-                            "actual_state": item.actual_state.value,
-                        }
-                    )
+        result = ServiceTools.service_to_list(service=query, settings=subquery)
 
         if not result:
             return jsonify({"message": "No service found"}), 404
@@ -86,125 +93,115 @@ class ServiceController:
             return jsonify(result), 200
 
     def put(self=None, guid=None, data=None):
+        """Update services and its settings in the database"""
 
-        if "status" in data:
-            for item in Status:
-                if item.value == data["status"]:
-                    data["status"] = item.name
+        setting = data.get("settings", {})
+
+        if "status" in setting:
+            setting["status"] = ServiceTools.valid_status(status=setting["status"])
 
         if "actual_state" in data:
-            for item in Response:
-                if item.value == data["actual_state"]:
-                    data["actual_state"] = item.name
+            data["actual_state"] = ServiceTools.valid_actual_state(
+                actual_state=data["actual_state"]
+            )
 
-        from models.service import Service
         from models.settings import Settings
+        from models.service import Service
         from app.flask import db
 
-        service = Service.query.filter_by(guid=guid)
-        settings = Settings.query.filter_by(guid=service.setting_guid)
+        service = Service.query.filter_by(guid=guid).first()
+        settings = Settings.query.filter_by(guid=setting["guid"]).first()
 
         if not service:
             return jsonify({"message": "No service found"}), 404
 
-        for item in service:
-            if "name" in data:
-                item.name = data["name"]
-            if "actual_state" in data:
-                item.actual_state = data["actual_state"]
+        if "name" in data:
+            service.name = data["name"]
+        if "actual_state" in data:
+            service.actual_state = data["actual_state"]
 
-        for subitem in settings:
-            if "status" in data:
-                subitem.status = data["status"]
-            if "address" in data:
-                subitem.address = data["address"]
-            if "frequency" in data:
-                subitem.frequency = data["frequency"]
-            if "response_time" in data:
-                subitem.response_time = data["response_time"]
-            if "number_of_samples" in data:
-                subitem.number_of_samples = data["number_of_samples"]
+        if "status" in setting:
+            settings.status = setting["status"]
+        if "address" in setting:
+            settings.address = setting["address"]
+        if "frequency" in setting:
+            settings.frequency = ServiceTools.string_to_int(data=setting["frequency"])
+        if "response_time" in setting:
+            settings.response_time = setting["response_time"]
+        if "number_of_samples" in setting:
+            settings.number_of_samples = setting["number_of_samples"]
 
         db.session.commit()
 
         # changes in scheduler
         from app.flask import state_checker
 
-        if data["status"] == Response.AVAILABLE.name:
+        if settings.status.name == Status.ACTIVE.name:
             state_checker.stop_task_by_tag(service.guid)
-            state_checker.schedule_task(service)
-            print(f"Service: '{service.guid}' rescheduled successfully.")
+            state_checker.schedule_task(service, settings)
+            print(f"RESET: '{service.guid}' rescheduled successfully.")
         else:
             state_checker.stop_task_by_tag(service.guid)
-            print(f"Service: '{service.guid}' stopped successfully.")
+            print(f"STOP: '{service.guid}' stopped successfully.")
 
         return {"message": "Service updated successfully"}, 200
 
     def delete(self=None, guid=None):
-
-        from models.service import Service
+        """Delete services and its settings from the database"""
         from models.settings import Settings
-        from app.flask import db
+        from models.service import Service
+        from app.flask import state_checker
 
-        service = Service.query.filter_by(guid=guid)
+        service = Service.query.filter_by(guid=guid).first()
+        settings = Settings.query.filter_by(guid=service.setting_guid).first()
 
         if not service:
             return jsonify({"message": "No service found"}), 404
+        elif settings.status == Status.ACTIVE.name:
+            return jsonify({"message": "Service is active"}), 400
         else:
-            settings = Settings.query.filter_by(guid=service.setting_guid)
-            db.session.delete(service)
-            db.session.delete(settings)
-            db.session.commit()
+            PostgresTools.delete_data(data=service)
+            PostgresTools.delete_data(data=settings)
+            # InfluxTools.delete_bucket(name=guid)
+            state_checker.stop_task_by_tag(guid)
+            print(f"STOP: '{guid}' stopped successfully.")
+
             return jsonify({"message": "Service deleted successfully"}), 200
 
     def search(self=None, data=None):
+        """Search service in the database"""
 
         if "status" in data:
-            for item in Status:
-                if item.value == data["status"]:
-                    data["status"] = item.name
-                else:
-                    del data["status"]
+            data["status"] = ServiceTools.valid_status(status=data["status"])
 
         if "actual_state" in data:
-            for item in Response:
-                if item.value == data["actual_state"]:
-                    data["actual_state"] = item.name
-                else:
-                    del data["actual_state"]
+            data["actual_state"] = ServiceTools.valid_actual_state(
+                actual_state=data["actual_state"]
+            )
 
-        from models.service import Service
         from models.settings import Settings
+        from models.service import Service
 
+        result = []
         if data:
             query = Service.query.filter(
-                Service.name.like(f"%{data['name']}%"),
-                Service.actual_state == data["actual_state"],
+                (Service.name.ilike(f"%{data['name']}%") if "name" in data else True),
+                (
+                    Service.actual_state == data["actual_state"]
+                    if "actual_state" in data
+                    else True
+                ),
             )
             reverse_query = Settings.query.filter(
                 Settings.status == data["status"] if "status" in data else True,
-                Settings.address.like(f"%{data['address']}%"),
+                (
+                    Settings.address.ilike(f"%{data['address']}%")
+                    if "address" in data
+                    else True
+                ),
             )
 
-            result = []
-            for service in query:
-                for setting in reverse_query:
-                    if service.setting_guid == setting.guid:
-                        result.append(
-                            {
-                                "guid": service.guid,
-                                "name": service.name,
-                                "setting": {
-                                    "guid": setting.guid,
-                                    "status": setting.status.value,
-                                    "address": setting.address,
-                                    "frequency": setting.frequency,
-                                    "response_time": setting.response_time,
-                                    "number_of_samples": setting.number_of_samples,
-                                },
-                                "actual_state": service.actual_state.value,
-                            }
-                        )
+            result = ServiceTools.query_to_list(service=query, settings=reverse_query)
 
         if not result:
             return jsonify({"message": "No service found"}), 404

@@ -30,16 +30,36 @@ class InfluxTools:
         retention_rules = BucketRetentionRules(type="expire", every_seconds=retention)
 
         client.buckets_api().create_bucket(
-            bucket_name=name,
+            bucket_name=str(name),
             retention_rules=retention_rules,
             org=os.getenv("INFLUXDB_ORG"),
         )
 
         client.close()
-
+        print(f"Bucket {name} created successfully.")
         return f"Bucket {name} created with retention {retention}"
 
+    def delete_bucket(self=None, name=None):
+        """Deletes bucket in organisation"""
+        client = InfluxTools.connector()
+
+        try:
+            buckets_api = client.buckets_api()
+            # Get the bucket details by name
+            bucket = buckets_api.find_bucket_by_name(str(name))
+            if not bucket:
+                print(f"Bucket '{name}' not found.")
+                return
+            # Delete the bucket
+            buckets_api.delete_bucket(bucket)
+            print(f"Bucket '{name}' deleted successfully.")
+        except Exception as e:
+            print(f"Error while deleting bucket: {e}")
+        finally:
+            client.close()
+
     def write_data(self=None, bucket=None, point=None):
+        """Write data to the specified bucket"""
         client = InfluxTools.connector()
 
         # Write the point to the specified bucket

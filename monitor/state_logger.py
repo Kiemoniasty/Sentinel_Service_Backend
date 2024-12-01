@@ -1,13 +1,18 @@
+"""State logging to influx class and method ."""
+
 from influxdb_client import Point
 from databases.influxdb_tools import InfluxTools
 from models.service_state import StateLog
 
 
 class StateLogger:
+    """
+    A class to write state logs to an InfluxDB bucket.
+    """
+
     def write_state(self, state_log: StateLog):
         """
         Write data from a StateLog instance to an InfluxDB bucket.
-        The bucket name is expected to be the `guid` of the StateLog.
         """
         if not state_log.guid:
             raise ValueError("StateLog must have a guid to define the target bucket.")
@@ -23,5 +28,3 @@ class StateLogger:
 
         bucket_name = str(state_log.guid)
         InfluxTools.write_data(bucket=bucket_name, point=point)
-
-    # UPDATE ACTUAL STATE in Services db
