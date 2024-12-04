@@ -4,6 +4,7 @@ import subprocess
 from databases.postgres_tools import PostgresTools
 from enums.sentinel_enums import Codes, Response
 from models.service_state import StateLog
+from monitor.state_logger import Loggers
 
 # from monitor.state_logger import StateLogger
 
@@ -58,9 +59,9 @@ class HealthChecker:
 
         PostgresTools.update_service(guid=guid, data=data)
 
-        print(f"result: {state_log.get()}")
+        # print(f"result: {state_log.get()}")
         # for item in state_log.__dict__:
         #     print(item, ":", state_log.__dict__[item])
         # print()
         # PostgresTools.write_data(data=service)
-        # StateLogger.write_state(None, state_log)
+        Loggers.write_state(None, state_log)

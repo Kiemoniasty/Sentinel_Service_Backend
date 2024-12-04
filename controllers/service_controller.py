@@ -1,6 +1,7 @@
 """Collection of methods for ServiceController"""
 
 from flask import jsonify
+import constants
 from controllers.service_tools import ServiceTools
 from databases.influxdb_tools import InfluxTools
 from databases.postgres_tools import PostgresTools
@@ -54,7 +55,7 @@ class ServiceController:
         PostgresTools.write_data(data=new_service)
 
         # create bucket in InfluxDB
-        # InfluxTools.create_bucket(name=new_service.guid)
+        InfluxTools.create_bucket(name=new_service.guid)
         # InfluxTools.delete_bucket(name=new_service.guid)
 
         # create task in scheduler
@@ -62,7 +63,14 @@ class ServiceController:
 
         if new_setting.status.name == Status.ACTIVE.name:
             state_checker.schedule_task(new_service, new_setting)
-            print("START: '{new_service.guid}' scheduled successfully.")
+            content = (
+                constants.SCHD_NEW1
+                + str(new_service.name)
+                + constants.SCHD_NEW2
+                + str(new_service.guid)
+                + constants.SCHD_NEW3
+            )
+            InfluxTools.write_log(content)
 
         return jsonify({"message": "Service created successfully"}), 201
 
@@ -111,12 +119,28 @@ class ServiceController:
         settings = Settings.query.filter_by(guid=service.setting_guid).first()
 
         if settings.status.name == Status.ACTIVE.name:
-            state_checker.stop_task_by_tag(service.guid)
+            state_checker.stop_task_by_tag(service.guid, service.name)
             state_checker.schedule_task(service, settings)
-            print(f"RESET: '{service.guid}' rescheduled successfully.")
+
+            content = (
+                constants.SCHD_RES1
+                + str(service.name)
+                + constants.SCHD_RES2
+                + str(service.guid)
+                + constants.SCHD_RES3
+            )
         else:
-            state_checker.stop_task_by_tag(service.guid)
-            print(f"STOP: '{service.guid}' stopped successfully.")
+            state_checker.stop_task_by_tag(service.guid, service.name)
+
+            content = (
+                constants.SCHD_STOP1
+                + str(service.name)
+                + constants.SCHD_STOP2
+                + str(service.guid)
+                + constants.SCHD_STOP3
+            )
+
+        InfluxTools.write_log(content)
 
         return {"message": "Service updated successfully"}, 200
 
@@ -136,9 +160,17 @@ class ServiceController:
         else:
             PostgresTools.delete_data(data=service)
             PostgresTools.delete_data(data=settings)
-            # InfluxTools.delete_bucket(name=guid)
-            state_checker.stop_task_by_tag(guid)
-            print(f"STOP: '{guid}' stopped successfully.")
+            InfluxTools.delete_bucket(name=guid)
+            state_checker.stop_task_by_tag(guid, service.name)
+
+            content = (
+                constants.SCHD_STOP1
+                + str(service.name)
+                + constants.SCHD_STOP2
+                + str(service.guid)
+                + constants.SCHD_STOP3
+            )
+            InfluxTools.write_log(content)
 
             return jsonify({"message": "Service deleted successfully"}), 200
 

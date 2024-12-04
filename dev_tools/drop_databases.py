@@ -53,7 +53,7 @@ def delete_uuid_buckets():
 
     for bucket in all_buckets:
         bucket_name = bucket.name
-        if is_uuid4(bucket_name):
+        if is_uuid4(bucket_name) | (bucket_name == "app_logs"):
             print(f"Deleting bucket: {bucket_name}")
             buckets_api.delete_bucket(bucket)
         else:

@@ -3,6 +3,8 @@
 import threading
 import time
 import schedule
+import constants
+from databases.influxdb_tools import InfluxTools
 from enums.sentinel_enums import Status
 from monitor.health_checker import HealthChecker
 
@@ -15,7 +17,6 @@ class StateChecker:
 
     @staticmethod
     def schedule_task(service, settings):
-        # def schedule_task(self, service, settings):
         """
         Add a new task for a specific service.
         """
@@ -24,10 +25,6 @@ class StateChecker:
             HealthChecker.ping_service(
                 guid=service.guid, service=service, settings=settings
             )
-            from app.flask import state_checker
-
-            print("Stopping...")
-            state_checker.stop()
 
         def run_threaded(job_func):
             job_thread = threading.Thread(target=job_func)
@@ -37,16 +34,16 @@ class StateChecker:
         schedule.every(settings.frequency).seconds.do(run_threaded, job).tag(
             str(service.guid)
         )
-        print(f"Task added for service '{service.guid}'.")
+        # print(f"Task added for service '{service.guid}'.")
 
     @staticmethod
-    def stop_task_by_tag(tag):
-        # def stop_task_by_tag(self, tag):
+    def stop_task_by_tag(tag, name):
         """
         Stop a scheduled job by its tag.
         """
         schedule.clear(str(tag))
-        print(f"Task with tag '{tag}' has been stopped.")
+        content = constants.SCHD_STOP_TAG1 + str(name) + constants.SCHD_STOP_TAG2
+        InfluxTools.write_log(content)
 
     def run_continuously(self, interval=1):
         """
@@ -68,7 +65,8 @@ class StateChecker:
 
         continuous_thread = ScheduleThread(self.cease_continuous_run)
         continuous_thread.start()
-        print("Background scheduler started.")
+
+        InfluxTools.write_log(constants.SCHD_RUNNING)
 
     def stop(self):
         """
@@ -76,7 +74,7 @@ class StateChecker:
         """
         if self.cease_continuous_run:
             self.cease_continuous_run.set()
-            print("Background scheduler stopped.")
+            InfluxTools.write_log(constants.SCHD_STOP)
 
     def schedule_list(self):
         """
@@ -91,7 +89,7 @@ class StateChecker:
             if settings.status.name == Status.ACTIVE.name:
                 self.schedule_task(service, settings)
 
-        print("All tasks scheduled.")
+        InfluxTools.write_log(constants.SCHD_READY)
 
     def get_task_list(self):
         """

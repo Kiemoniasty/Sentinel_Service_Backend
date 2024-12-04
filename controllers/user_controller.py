@@ -1,7 +1,9 @@
 """Controller for user instance"""
 
 from flask import jsonify
+import constants
 from controllers.user_tools import UserTools
+from databases.influxdb_tools import InfluxTools
 from databases.postgres_tools import PostgresTools
 from enums.user_enums import AccountType
 
@@ -44,6 +46,9 @@ class UserController:
             return jsonify({"message": message}), 409
         else:
             PostgresTools.write_data(data=new_user)
+            content = constants.USR_NEW1 + new_user.login + constants.USR_NEW2
+            InfluxTools.write_log(content)
+
             return jsonify({"message": "User created successfully"}), 201
 
     def get(self=None, guid=None):
@@ -90,6 +95,9 @@ class UserController:
 
         db.session.commit()
 
+        content = constants.USR_UPD1 + user.login + constants.USR_UPD2
+        InfluxTools.write_log(content)
+
         return jsonify({"message": "User updated successfully"}), 200
 
     def delete(self=None, guid=None):
@@ -103,6 +111,9 @@ class UserController:
             return jsonify({"message": "User is active"}), 409
         else:
             PostgresTools.delete_data(data=user)
+
+            content = constants.USR_DEL1 + user.login + constants.USR_DEL2
+            InfluxTools.write_log(content)
 
             return jsonify({"message": "User deleted successfully"}), 200
 

@@ -1,8 +1,11 @@
 """Influxdb tools that can be used in none specific tasks"""
 
 import os
+import time
 from dotenv import load_dotenv
-from influxdb_client import BucketRetentionRules, InfluxDBClient
+from influxdb_client import BucketRetentionRules, InfluxDBClient, Point
+
+import constants
 
 load_dotenv(override=True)
 
@@ -36,8 +39,9 @@ class InfluxTools:
         )
 
         client.close()
-        print(f"Bucket {name} created successfully.")
-        return f"Bucket {name} created with retention {retention}"
+
+        content = constants.BKT_NEW1 + str(name) + constants.BKT_NEW2
+        InfluxTools.write_log(content)
 
     def delete_bucket(self=None, name=None):
         """Deletes bucket in organisation"""
@@ -52,11 +56,12 @@ class InfluxTools:
                 return
             # Delete the bucket
             buckets_api.delete_bucket(bucket)
-            print(f"Bucket '{name}' deleted successfully.")
+            content = constants.BKT_DEL1 + str(name) + constants.BKT_DEL2
         except Exception as e:
-            print(f"Error while deleting bucket: {e}")
+            content = constants.BKT_ERROR + str(e)
         finally:
             client.close()
+            InfluxTools.write_log(content)
 
     def write_data(self=None, bucket=None, point=None):
         """Write data to the specified bucket"""
@@ -65,5 +70,16 @@ class InfluxTools:
         # Write the point to the specified bucket
         write_api = client.write_api()
         write_api.write(bucket=bucket, org=os.getenv("INFLUXDB_ORG"), record=point)
-        print("Data written successfully.")
+        client.close()
+
+    @staticmethod
+    def write_log(content):
+        """Write data to the logs bucket"""
+        # time.sleep(1)
+        client = InfluxTools.connector()
+
+        point = Point("app_logs").tag("log", "log").field("content", content)
+
+        write_api = client.write_api()
+        write_api.write(bucket="app_logs", org=os.getenv("INFLUXDB_ORG"), record=point)
         client.close()

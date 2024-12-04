@@ -4,7 +4,6 @@ import os
 import psycopg
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
-
 from controllers.service_tools import ServiceTools
 
 load_dotenv(override=True)
@@ -15,6 +14,7 @@ class PostgresTools:
 
     def psycopg_connector(self=None, dbname=None):
         """Establish connection with database with Psycopg"""
+
         return psycopg.connect(
             host=os.getenv("POSTGRES"),
             hostaddr=os.getenv("POSTGRES_HOST"),
