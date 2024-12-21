@@ -3,6 +3,7 @@
 # import os
 from dotenv import load_dotenv
 from flask import Flask
+from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 import config
 import constants
@@ -21,6 +22,7 @@ InfluxTools.write_log(constants.INIT_APP)
 
 app = Flask(__name__)
 app.config.from_object(config)
+CORS(app)
 
 # init Postgres databases
 InitPostgresDBs.create_dbs()

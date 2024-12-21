@@ -44,6 +44,7 @@ class ServiceTools:
                 if item.setting_guid == subitem.guid:
                     result.append(
                         {
+                            "guid": item.guid,
                             "name": item.name,
                             "setting": {
                                 "guid": subitem.guid,

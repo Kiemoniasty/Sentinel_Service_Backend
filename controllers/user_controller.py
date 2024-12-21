@@ -81,6 +81,8 @@ class UserController:
             data["account_type"] = UserTools.valid_account_type(
                 account_type=data["account_type"]
             )
+        if "is_active" in data:
+            data["is_active"] = UserTools.valid_is_active(is_active=data["is_active"])
 
         if "login" in data:
             user.login = data["login"]
@@ -120,8 +122,6 @@ class UserController:
     def search(self=None, data=None):
         """Search user in the database"""
 
-        for item in data:
-            print(item + ": " + str(data[item]))
         from models.user import User
 
         if "is_active" in data:

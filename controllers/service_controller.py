@@ -208,6 +208,11 @@ class ServiceController:
             )
 
             result = ServiceTools.query_to_list(service=query, settings=reverse_query)
+        else:
+            query = Service.query.all()
+            reverse_query = Settings.query.all()
+
+            result = ServiceTools.query_to_list(service=query, settings=reverse_query)
 
         if not result:
             return jsonify({"message": "No service found"}), 404
