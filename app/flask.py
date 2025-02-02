@@ -2,9 +2,10 @@
 
 # import os
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
+from flask_jwt_extended import JWTManager, get_jwt_identity
 import config
 import constants
 from databases.influxdb_tools import InfluxTools
@@ -22,7 +23,9 @@ InfluxTools.write_log(constants.INIT_APP)
 
 app = Flask(__name__)
 app.config.from_object(config)
-CORS(app)
+CORS(app, supports_credentials=True, expose_headers=["Authorization"])
+
+jwt = JWTManager(app)
 
 # init Postgres databases
 InitPostgresDBs.create_dbs()
@@ -61,3 +64,17 @@ app.register_blueprint(api_bp)
 
 InfluxTools.write_log(constants.API_RDY)
 InfluxTools.write_log(constants.APP_RDY)
+
+# InfluxTools.query_data(bucket="bf89d859-cf0e-4f4b-935b-93d7835b5236")
+
+
+# @app.before_request
+# def before_request():
+#     try:
+#         print("Headers: ", request.headers)
+#         auth_header = request.headers.get("Authorization")
+#         print("Authorization Header:", auth_header)
+#         identity = get_jwt_identity()
+#         print("JWT Identity:", identity)
+#     except Exception as e:
+#         print("Error: ", e)

@@ -1,6 +1,7 @@
 """Controller for user instance"""
 
 from flask import jsonify
+from flask_jwt_extended import create_access_token
 import constants
 from controllers.user_tools import UserTools
 from databases.influxdb_tools import InfluxTools
@@ -29,7 +30,7 @@ class UserController:
         new_user = User(
             guid=data.get("guid"),
             login=data["login"],
-            password=data["password"],
+            password=UserTools.hash_password(password=data["password"]),
             email=data.get("email"),
             phone_number=data.get("phone_number"),
             account_type=(
@@ -88,6 +89,8 @@ class UserController:
             user.login = data["login"]
         if "email" in data:
             user.email = data["email"]
+        if "password" in data:
+            user.password = UserTools.hash_password(password=data["password"])
         if "phone_number" in data:
             user.phone_number = data["phone_number"]
         if "account_type" in data:
@@ -160,24 +163,62 @@ class UserController:
         else:
             return jsonify(result), 200
 
+    def login(self=None, data=None):
+        """Login user"""
+        from models.user import User
+
+        user = User.query.filter_by(login=data["login"]).first()
+
+        if not user:
+            return jsonify({"message": "Invalid login or password"}), 401
+        elif not UserTools.check_password(
+            hashed_pass=user.password, password=data["password"]
+        ):
+            return jsonify({"message": "Invalid login or password"}), 401
+        else:
+            access_token = create_access_token(
+                identity=user.guid, additional_claims={"role": user.account_type.value}
+            )
+            return jsonify({"access_token": access_token}), 200
+
     def change_password(self=None, guid=None, data=None):
         """Change user password"""
         from models.user import User
         from app.flask import db
 
-        users = User.query.filter_by(guid=guid)
-        for item in users:
-            user = item
-
-        current_password = data.get("current_password")
+        user = User.query.filter_by(guid=guid).first()
         new_password = data.get("new_password")
 
         if not user:
-            return jsonify({"message": "No user found"}), 404
+            return jsonify({"message": "Invalid login or password"}), 401
 
-        if user.password != current_password:
-            return jsonify({"message": "Invalid password"}), 401
+        if not UserTools.check_password(
+            hashed_pass=user.password, password=data["password"]
+        ):
+            return jsonify({"message": "Invalid login or password"}), 401
         else:
-            user.password = new_password
+            user.password = UserTools.hash_password(password=new_password)
             db.session.commit()
             return jsonify({"message": "Password updated successfully"}), 200
+
+    def get_logs(self=None, sort=None, page=None, date=None):
+        """Query logs from the database"""
+
+        result = InfluxTools.query_app_logs()
+        result = sorted(
+            result,
+            key=lambda x: x["time_stamp"],
+            reverse=True if sort == "desc" else False,
+        )
+        if date:
+            result = [
+                item for item in result if item["time_stamp"].split("T")[0] == date
+            ]
+
+        if page:
+            result = result[int(page) * 30 : (int(page) + 1) * 30]
+
+        if not result:
+            return jsonify({"message": "No logs found"}), 404
+        else:
+            return jsonify(result), 200

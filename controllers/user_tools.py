@@ -1,6 +1,7 @@
 """Collection of tools for User Controllers"""
 
 from enums.user_enums import AccountType
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 class UserTools:
@@ -69,3 +70,13 @@ class UserTools:
             message += " already in use."
 
         return message
+
+    def hash_password(self=None, password=None):
+        """Hash the password"""
+
+        return generate_password_hash(password)
+
+    def check_password(self=None, password=None, hashed_pass=None):
+        """Check the password"""
+
+        return check_password_hash(hashed_pass, password)

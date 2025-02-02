@@ -5,7 +5,8 @@ import constants
 from controllers.service_tools import ServiceTools
 from databases.influxdb_tools import InfluxTools
 from databases.postgres_tools import PostgresTools
-from enums.sentinel_enums import Status
+from enums.sentinel_enums import Response, Status
+from monitor.state_logger import Loggers
 
 
 class ServiceController:
@@ -14,7 +15,7 @@ class ServiceController:
     def post(self=None, data=None):
         """Create a new service and its settings in database"""
 
-        setting = data.get("settings", {})
+        setting = data.get("setting", {})
 
         if "status" in setting:
             setting["status"] = ServiceTools.valid_status(status=setting["status"])
@@ -47,7 +48,7 @@ class ServiceController:
         new_service = Service(
             guid=data.get("guid"),
             name=data["name"],
-            actual_state=data["actual_state"],
+            actual_state=data.get("actual_state"),
             setting_guid=new_setting.guid,
         )
 
@@ -155,7 +156,7 @@ class ServiceController:
 
         if not service:
             return jsonify({"message": "No service found"}), 404
-        elif settings.status == Status.ACTIVE.name:
+        elif settings.status.name == Status.ACTIVE.name:
             return jsonify({"message": "Service is active"}), 400
         else:
             PostgresTools.delete_data(data=service)
@@ -216,5 +217,46 @@ class ServiceController:
 
         if not result:
             return jsonify({"message": "No service found"}), 404
+        else:
+            return jsonify(result), 200
+
+    def get_unavailable_services(self=None):
+        """Get unavailable services from the database"""
+
+        from models.service import Service
+        from models.settings import Settings
+
+        query = Service.query.all()
+        result = []
+
+        for service in query:
+            subquery = Settings.query.filter_by(guid=service.setting_guid).first()
+            if (
+                service.actual_state == Response.UNAVAILABLE
+                and subquery.status == Status.ACTIVE
+            ):
+                result.append(
+                    {
+                        "guid": service.guid,
+                        "name": service.name,
+                        "actual_state": ServiceTools.value_actual_state(
+                            actual_state=service.actual_state
+                        ),
+                        "address": subquery.address,
+                    }
+                )
+
+        if not result:
+            return jsonify({"message": "all services are ok!"}), 200
+        else:
+            return jsonify(result), 200
+
+    def get_service_logs(self=None, guid=None, sort=None):
+        """Get service logs from the database"""
+
+        result = Loggers.query_states(guid=guid, sort=sort)
+
+        if not result:
+            return jsonify({"message": "No logs found"}), 404
         else:
             return jsonify(result), 200

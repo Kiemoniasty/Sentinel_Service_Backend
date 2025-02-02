@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from influxdb_client import BucketRetentionRules, InfluxDBClient, Point
 
 import constants
+from models.service_state import StateLog
 
 load_dotenv(override=True)
 
@@ -75,7 +76,7 @@ class InfluxTools:
     @staticmethod
     def write_log(content):
         """Write data to the logs bucket"""
-        # time.sleep(1)
+        time.sleep(1)
         client = InfluxTools.connector()
 
         point = Point("app_logs").tag("log", "log").field("content", content)
@@ -83,3 +84,60 @@ class InfluxTools:
         write_api = client.write_api()
         write_api.write(bucket="app_logs", org=os.getenv("INFLUXDB_ORG"), record=point)
         client.close()
+
+    def query_data(self=None, bucket=None):
+        """Query data from the specified bucket"""
+        client = InfluxTools.connector()
+
+        query = f'from(bucket: "{bucket}") |> range(start: 0)'
+
+        query_api = client.query_api()
+        try:
+            result = query_api.query(org=os.getenv("INFLUXDB_ORG"), query=query)
+
+            results = []
+            for table in result:
+                for record in table.records:
+                    dummy = StateLog()
+                    dummy.time_stamp = record.get_time()
+                    dummy.state = record.get_value()
+                    dummy.name = record.values.get("name", None)
+                    dummy.status = record.values.get("status", None)
+                    dummy.code = record.values.get("code", None)
+                    dummy.message = record.values.get("message", None)
+
+                    results.append(dummy.get())
+        except Exception as e:
+            results = []
+        finally:
+            client.close()
+
+        return results
+
+    def query_app_logs(self=None):
+        """Query data from the specified bucket"""
+        client = InfluxTools.connector()
+
+        query = 'from(bucket: "app_logs") |> range(start: 0)'
+
+        query_api = client.query_api()
+        try:
+            result = query_api.query(org=os.getenv("INFLUXDB_ORG"), query=query)
+
+            results = []
+            for table in result:
+                for record in table.records:
+                    results.append(
+                        {
+                            "time_stamp": record.get_time().strftime(
+                                "%Y-%m-%dT%H:%M:%S"
+                            ),
+                            "content": record.get_value(),
+                        }
+                    )
+        except Exception as e:
+            results = []
+        finally:
+            client.close()
+
+        return results

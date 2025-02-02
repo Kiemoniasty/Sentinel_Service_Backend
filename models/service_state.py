@@ -43,7 +43,11 @@ class StateLog:
         """Get values for instance of StateLog"""
         result = {
             "guid": self._guid,
-            "time_stamp": self._time_stamp,
+            "time_stamp": (
+                self._time_stamp.strftime("%Y-%m-%dT%H:%M:%S")
+                if self._time_stamp
+                else None
+            ),
             "name": self._name,
             "state": self._state,
             "message": self._message,

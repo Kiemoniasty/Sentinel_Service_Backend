@@ -51,7 +51,7 @@ class PostgresTools:
     def update_service(self=None, guid=None, data=None):
         """Update service data in the database."""
 
-        setting = data.get("settings", {})
+        setting = data.get("setting", {})
 
         from models.settings import Settings
         from models.service import Service
@@ -69,6 +69,7 @@ class PostgresTools:
                 )
 
             if "status" in setting:
+                print(setting["status"])
                 settings.status = ServiceTools.valid_status(status=setting["status"])
             if "address" in setting:
                 settings.address = setting["address"]
