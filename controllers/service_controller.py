@@ -6,7 +6,7 @@ from controllers.service_tools import ServiceTools
 from databases.influxdb_tools import InfluxTools
 from databases.postgres_tools import PostgresTools
 from enums.sentinel_enums import Response, Status
-from monitor.state_logger import Loggers
+from monitor.state_logger import StateLogger
 
 
 class ServiceController:
@@ -254,7 +254,7 @@ class ServiceController:
     def get_service_logs(self=None, guid=None, sort=None):
         """Get service logs from the database"""
 
-        result = Loggers.query_states(guid=guid, sort=sort)
+        result = StateLogger.query_states(guid=guid, sort=sort)
 
         if not result:
             return jsonify({"message": "No logs found"}), 404

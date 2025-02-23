@@ -1,18 +1,20 @@
 
-DATABASE_URL=postgresql://postgres:PASSWORD@localhost:5432/postgres
-SENTINEL_URL=postgresql://postgres:PASSWORD@localhost:5432/sentinel_db
-USER_URL=postgresql://postgres:PASSWORD@localhost:5432/users_db
 # Description: Environment variables for establishing connection to Postgres database
+POSTGRES_URL=postgresql://postgres:password@localhost:5432/postgres
+SENTINEL_URL='postgresql://postgres:password@localhost:5432/sentinel_db'
+USER_URL='postgresql://postgres:password@localhost:5432/users_db'
 POSTGRES = Postgres
 POSTGRES_HOST = 127.0.0.1
 POSTGRES_PORT = 5432
 POSTGRES_USER = postgres
-POSTGRES_PASSWORD = PASSWORD
+POSTGRES_PASSWORD = password
 # Postgres database names
 POSTGRES_DB_NAME = postgres
 SENTINEL_DB_NAME = sentinel_db
 USER_DB_NAME = users_db
-#influxdb
+# Influxdb 
 INFLUXDB_URL = http://localhost:8086
-INFLUXDB_TOKEN = api_token
+INFLUXDB_TOKEN = your_token
 INFLUXDB_ORG = Service-Sentinel
+# JWT Secret
+JWT_SECRET = your_token

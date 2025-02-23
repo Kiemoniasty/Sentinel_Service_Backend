@@ -1,20 +1,23 @@
 """Collection of routes for the API"""
 
 from flask import Blueprint, request
+from flask_jwt_extended import get_jwt_identity, jwt_required
 from constants import BASE_URL
 from controllers.service_controller import ServiceController
 from controllers.user_controller import UserController
 from app.route_tools import role_required
-from flask_jwt_extended import (
-    JWTManager,
-    get_jwt,
-    get_jwt_identity,
-    jwt_required,
-    verify_jwt_in_request,
-)
 
 
 api = Blueprint("api", __name__)
+
+# IS ALIVE ROUTE
+
+
+@api.route("/health", methods=["GET"])
+def is_alive():
+    """GET /health - check if the service is alive"""
+    return {"status": "OK"}, 200
+
 
 # USER ROUTES
 

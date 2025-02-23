@@ -216,7 +216,7 @@ class UserController:
             ]
 
         if page:
-            result = result[int(page) * 30 : (int(page) + 1) * 30]
+            result = result[int(page) * 20 : (int(page) + 1) * 20]
 
         if not result:
             return jsonify({"message": "No logs found"}), 404

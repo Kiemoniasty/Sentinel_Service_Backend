@@ -6,7 +6,7 @@ from databases.influxdb_tools import InfluxTools
 from models.service_state import StateLog
 
 
-class Loggers:
+class StateLogger:
     """
     A class to write state logs to an InfluxDB bucket.
     """
