@@ -4,9 +4,6 @@ import os
 from dotenv import load_dotenv
 from psycopg import sql
 import psycopg
-
-# from databases.init_sentineldb import create_sentineldb_tables
-# from databases.init_userdb import create_userdb_tables
 import constants
 from databases.influxdb_tools import InfluxTools
 from databases.postgres_tools import PostgresTools

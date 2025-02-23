@@ -57,9 +57,4 @@ class HealthChecker:
 
         PostgresTools.update_service(guid=guid, data=data)
 
-        # print(f"result: {state_log.get()}")
-        # for item in state_log.__dict__:
-        #     print(item, ":", state_log.__dict__[item])
-        # print()
-        # PostgresTools.write_data(data=service)
         StateLogger.write_state(None, state_log)
