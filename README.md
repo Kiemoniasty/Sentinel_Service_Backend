@@ -67,7 +67,7 @@ Key features include:
 
 ```bash
 # Clone the repository
-git clone https://github.com/kiemoniasty/service_sentinel_backend.git
+git clone https://github.com/Kiemoniasty/service_sentinel_backend.git
 cd service_sentinel_backend
 
 # Create a virtual environment and activate it
