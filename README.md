@@ -25,6 +25,16 @@ Service Sentinel is a backend platform designed for tracking service states, use
 <br>
 <br>
 
+Related Projects:
+
+<ul>
+  <li><a href="https://github.com/Kiemoniasty/Sentinel_Service_Frontend">Sentinel Service Backend</a></li>
+</ul>
+
+
+<br>
+<br>
+
 Key features include:
 
 <ul>
