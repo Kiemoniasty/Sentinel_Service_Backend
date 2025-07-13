@@ -4,9 +4,11 @@
 
 <br>
 
+---
+
 <h3>Service Sentinel is a backend service designed for efficient and real-time tracking of system components. Built with Flask, SQLAlchemy, and InfluxDB, it supports user management, logging, and metric collection.</h3>
 
-<br>
+---
 
 ### Navigation
 
