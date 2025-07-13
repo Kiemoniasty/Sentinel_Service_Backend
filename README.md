@@ -23,7 +23,6 @@
 Service Sentinel is a backend platform designed for tracking service states, user management, and real-time notification logging. It exposes a RESTful API for frontend or system integrations and uses a modular Python architecture for scalability and maintainability.
 
 <br>
-<br>
 
 Related Projects:
 
@@ -32,7 +31,6 @@ Related Projects:
 </ul>
 
 
-<br>
 <br>
 
 Key features include:
@@ -109,7 +107,6 @@ USER_DB_NAME=users_db
 INFLUXDB_URL=http://localhost:8086
 INFLUXDB_TOKEN=api_token
 INFLUXDB_ORG=Service-Sentinel
-
 ```
 
 </details> <details> <summary>▶️ Run the app</summary>
@@ -120,6 +117,7 @@ python main.py
 ```
 
 </details> 
+<br>
 
 ## Progress
 
