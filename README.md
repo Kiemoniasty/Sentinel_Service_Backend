@@ -119,7 +119,9 @@ INFLUXDB_ORG=Service-Sentinel
 python main.py
 ```
 
-</details> <br>
+</details> 
+
+## Progress
 
 | Feature                             | Status |
 | ----------------------------------- | ------ |
