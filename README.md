@@ -22,6 +22,9 @@
 <div align='justify'>
 Service Sentinel is a backend platform designed for tracking service states, user management, and real-time notification logging. It exposes a RESTful API for frontend or system integrations and uses a modular Python architecture for scalability and maintainability.
 
+<br>
+<br>
+
 Key features include:
 
 <ul>
