@@ -36,7 +36,7 @@ Key features include:
 <br>
 
 ## Tech stack
-<div>
+
 | Category       | Technology            |
 | -------------- | --------------------- |
 | Language       | Python 3.8+           |
@@ -46,7 +46,6 @@ Key features include:
 | Time-Series DB | InfluxDB              |
 | Relational DB  | PostgreSQL            |
 | Architecture   | Modular / MVC-like    |
-</div>
 
 <br>
 
