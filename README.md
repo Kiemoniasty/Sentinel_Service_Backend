@@ -59,12 +59,12 @@ Key features include:
 
 ```bash
 # Clone the repository
-git clone https://github.com/your_username/service_sentinel_backend.git
+git clone https://github.com/kiemoniasty/service_sentinel_backend.git
 cd service_sentinel_backend
 
 # Create a virtual environment and activate it
 python -m venv venv
-source venv/bin/activate  # on Windows: venv\Scripts\activate
+source venv/bin/activate # on Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
